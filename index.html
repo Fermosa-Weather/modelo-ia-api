@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta del Tiempo en Formosa</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        #output {
+            margin-top: 20px;
+            white-space: pre-wrap; /* Para mantener el formato del texto */
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 200px;
+            overflow-y: scroll; /* Para permitir desplazamiento */
+        }
+    </style>
+</head>
+<body>
+
+<h1>Consulta del Tiempo en Formosa</h1>
+<label for="queryInput">Ingrese su consulta (ejemplo: "¿Cómo estará el tiempo el 2024-10-30?"):</label>
+<input type="text" id="queryInput" required placeholder="Ejemplo: ¿Cómo estará el tiempo el 2024-10-30?">
+<button id="fetchData">Obtener Datos</button>
+
+<div id="output"></div>
+
+<script>
+    document.getElementById('fetchData').addEventListener('click', async () => {
+        const outputDiv = document.getElementById('output');
+        const queryInput = document.getElementById('queryInput').value;
+
+        if (!queryInput) {
+            outputDiv.textContent = 'Por favor, ingrese una consulta.';
+            return;
+        }
+
+        outputDiv.textContent = ''; // Limpiar el contenido anterior
+
+        try {
+            const response = await fetch('http://localhost:3000/api/obtener-datos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: queryInput }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.statusText}`);
+            }
+
+            // Leer la respuesta como texto
+            const respuestaTexto = await response.text();
+
+            // Mostrar la respuesta letra por letra
+            for (const char of respuestaTexto) {
+                outputDiv.textContent += char; // Agregar cada carácter al output
+                outputDiv.scrollTop = outputDiv.scrollHeight; // Desplazar hacia abajo automáticamente
+                await new Promise(resolve => setTimeout(resolve, 50)); // Espera 50 ms entre cada carácter
+            }
+        } catch (error) {
+            outputDiv.textContent = `Error al obtener datos: ${error.message}`;
+        }
+    });
+</script>
+
+</body>
+</html>
